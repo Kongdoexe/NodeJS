@@ -47,7 +47,7 @@ router.post("/", fileUpload.diskLoader.single("file"), async (req, res) => {
   Date.now() + "-" + Math.round(Math.random() * 10000) + ".png";
 
   // define saving filename on Storage
-  const storageRef = ref(storage, "/images/" + uid + "/" + filename);
+  const storageRef = ref(storage, "/images/Uid_" + uid + "/" + filename);
 
   // define detail
   const metadata = {
