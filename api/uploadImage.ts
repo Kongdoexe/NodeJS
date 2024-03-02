@@ -40,6 +40,7 @@ class FileMiddleware {
 const fileUpload = new FileMiddleware();
 router.post("/", fileUpload.diskLoader.single("file"), async (req, res) => {
   const uid = req.query.id;
+  const string = "";
   console.log(uid);
   // 2. upload file to firebase storage
   // generate filename
