@@ -1,5 +1,4 @@
 import express from "express";
-import { router as Test } from "./api/Test";
 import { router as Origin } from "./api/Origin";
 import { router as Upload} from "./api/uploadImage";
 import bodyParser from "body-parser";
@@ -16,5 +15,5 @@ app.use(
 );
 app.use(bodyParser.text());
 app.use(bodyParser.json());
-app.use("/", Test);
 app.use("/Origin", Origin);
+app.use("/Upload", Upload);
