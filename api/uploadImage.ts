@@ -11,10 +11,6 @@ import {
 
 export const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.send("Method Get in upload.ts");
-});
-
 // 1. connect firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBSRn8TIk6T1bZ8fU2SfKPrtAWL0S5nYC4",

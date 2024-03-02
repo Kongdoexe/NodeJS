@@ -61,7 +61,7 @@ router.post("/Login", async (req, res) => {
     let sql = "SELECT * FROM User WHERE gmail = ?";
     conn.query(sql, [body.gmail], async (err, result) => {
       if (err) {
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).send({ error: "Internal Server Error" });
         return;
       }
 
@@ -77,10 +77,10 @@ router.post("/Login", async (req, res) => {
           res.status(401).send("Password Not Match");
         }
       } else {
-        res.status(404).json({ error: "Gmail Not Found" });
+        res.status(404).send({ error: "Gmail Not Found" });
       }
     });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
