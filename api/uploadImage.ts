@@ -38,14 +38,16 @@ class FileMiddleware {
 
 // PUT
 const fileUpload = new FileMiddleware();
-router.post("/:uid", fileUpload.diskLoader.single("file"), async (req, res) => {
+router.post("/", fileUpload.diskLoader.single("file"), async (req, res) => {
+  const uid = req.query.id;
+  console.log(uid);
   // 2. upload file to firebase storage
   // generate filename
   const filename =
   Date.now() + "-" + Math.round(Math.random() * 10000) + ".png";
 
   // define saving filename on Storage
-  const storageRef = ref(storage, "/images/" + filename);
+  const storageRef = ref(storage, "/images/" + uid + "/" + filename);
 
   // define detail
   const metadata = {
