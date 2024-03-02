@@ -1,0 +1,86 @@
+import mysql from "mysql";
+import express from "express";
+// import bcryptt from "bcrypt";
+import { login, register } from "../model/model";
+import { conn } from "../dbconnect";
+
+export const router = express.Router();
+
+const saltRounds = 10;
+
+router.get("/Search", (req, res) => {
+
+  let sql = "SELECT * FROM User where gmail = ?";            
+
+  conn.query(sql,[req.query.gmail], (err, result) => {
+    if (err) {
+      res.status(500).json({ error: "Internal Server Error" });
+      throw err;
+    }
+
+    res.json(result[0]);
+  });
+});
+
+router.post("/Register", async (req, res) => {
+  try {
+    const body: register = req.body;
+    const bcrypt = require('bcrypt');
+
+    if (body.password === body.confim) {
+      const hashedPassword = await bcrypt.hash(body.password, saltRounds);
+      let sql =
+        "INSERT INTO `User`(`name`, `gmail`, `password`, `image`, `type`) VALUES (?,?,?,?,?)";
+      sql = mysql.format(sql, [
+        body.name,
+        body.gmail,
+        hashedPassword,
+        body.image,
+        body.type,
+      ]);
+      conn.query(sql, (err, result) => {
+        if (err) throw err;
+
+        res
+          .status(201)
+          .json({ affected_row: result.affectedRows, last_idx: result });
+      });
+    } else {
+      res.status(400).send("Passwords do not match");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+router.post("/Login", async (req, res) => {
+  try {
+    const body: login = req.body;
+    const bcrypt = require('bcrypt');
+    let sql = "SELECT * FROM User WHERE gmail = ?";
+    conn.query(sql, [body.gmail], async (err, result) => {
+      if (err) {
+        res.status(500).json({ error: "Internal Server Error" });
+        return;
+      }
+
+      if (result.length > 0) {
+        const passwordMatch = await bcrypt.compare(
+          body.password,
+          result[0].password
+        );
+
+        if (passwordMatch) {
+          res.status(200).json({ message: "Login successful" });
+        } else {
+          res.status(401).send("Password Not Match");
+        }
+      } else {
+        res.status(404).json({ error: "Gmail Not Found" });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
