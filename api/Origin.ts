@@ -9,10 +9,16 @@ export const router = express.Router();
 const saltRounds = 10;
 
 router.get("/Search", (req, res) => {
+  let sql , query;
+  if(req.query.gmail){
+    sql = "SELECT * FROM User where gmail = ?";
+    query = req.query.gmail;    
+  } else if (req.query.id){
+    sql = "SELECT * FROM User where uid = ?"
+    query = req.query.id;
+  }
 
-  let sql = "SELECT * FROM User where gmail = ?";            
-
-  conn.query(sql,[req.query.gmail], (err, result) => {
+  conn.query(sql!,[query], (err, result) => {
     if (err) {
       res.status(500).json({ error: "Internal Server Error" });
       throw err;
@@ -72,7 +78,7 @@ router.post("/Login", async (req, res) => {
         );
 
         if (passwordMatch) {
-          res.status(200).json({ message: "Login successful" });
+          res.status(200).json(result[0]);
         } else {
           res.status(401).send("Password Not Match");
         }

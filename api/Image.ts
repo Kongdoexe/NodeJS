@@ -1,0 +1,128 @@
+import mysql from "mysql";
+import express from "express";
+// import bcryptt from "bcrypt";
+import { Image, login, register } from "../model/model";
+import { conn, queryAsync } from "../dbconnect";
+
+export const router = express.Router();
+
+// router.get("/", (req, res) => {
+//     res.send("GET IN Image.ts")
+// })
+
+router.get("/Search/:mid", (req, res) => {
+    let mid = req.params.mid;
+
+    let sql = "SELECT * FROM image where mid = ?"
+
+    conn.query(sql , [mid], (err, result) => {
+        if(err) {
+            console.error("Error executing quert: ", err);
+            return res.status(500).send({ error : "Internal Server Error" })
+        }
+
+        res.status(200).json(result[0]);
+    })
+})
+
+router.get("/Check/:id", (req, res) => {
+    let userId = req.params.id;
+
+    let sql = "SELECT COUNT(*) FROM image , User where image.uid = User.uid and User.uid = ?";
+
+    conn.query(sql, [userId], (err, result) => {
+        if(err){
+            console.error("Error executing quert: ", err);
+            return res.status(500).send({ error : "Internal Server Error" })
+        }
+
+        res.status(200).json(result[0]);
+    })
+})
+
+router.get("/:id", (req, res) => {
+    let userId = req.params.id;
+
+    let sql = "SELECT image.* FROM image , User where image.uid = User.uid and User.uid = ?";
+
+    conn.query(sql, [userId], (err, results) => {
+        if (err) {
+            console.error("Error executing query:", err);
+            return res.status(500).send({ error: "Internal Server Error" });
+        }
+
+        res.status(200).json(results);
+    });
+});
+
+router.post("/:id", (req, res) => {
+    let userId = req.params.id;
+    const body: Image = req.body;
+
+    let sql = "INSERT INTO `image`(`uid`, `name`, `image`, `nameImage`, `score`) VALUES (?, ?, ?, ?, ?)";
+
+    sql = mysql.format(sql , [
+        userId,
+        body.name,
+        body.image,
+        body.nameImage,
+        1500,
+        0,
+    ])
+
+    conn.query(sql, (err, result) => {
+        if(err) {
+            console.error("Error executing query: ", err);
+            return res.status(500).send({ error : "Internal Server Error" })
+        }
+
+        res.status(200).json(result)
+    })
+})
+
+router.delete("/:mid", (req, res) => {
+    let mid = req.params.mid;
+    
+    let sql = "delete from image where mid = ?";
+
+    conn.query(sql, [mid], (err, result) => {
+        if(err) {
+            console.error("Error executing query: ", err);
+            return res.status(500).send({ error : "Internal Server Error" })
+        }
+
+        res.status(200).json(result)
+    })
+})
+
+router.put("/Update:mid", async (req, res) => {
+    let mid = req.params.mid;
+    let img: Image = req.body
+
+    let sql = "select * from image where mid = ?";
+
+    sql = mysql.format(sql , [mid])
+
+    let result = await queryAsync(sql);
+
+    const imgOrigin: Image = JSON.parse(JSON.stringify(result));
+
+    const update = {...imgOrigin, ...img};
+
+    sql = "UPDATE `image` SET `mid`=?,`uid`=?,`name`=?,`image`=?,`nameImage`=?,`score`=? WHERE `mid` = ?";
+
+    sql = mysql.format(sql , [
+        update.mid,
+        update.uid,
+        update.name,
+        update.image,
+        update.nameImage,
+        1500,
+        mid
+    ]);
+
+    conn.query(sql, (err, result) => {
+        if(err) throw err;
+        res.status(200).json(result)
+    })
+})

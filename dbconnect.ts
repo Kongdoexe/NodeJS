@@ -24,3 +24,5 @@ export const conn = mysql.createPool({
 //   password: "Tinchai",
 //   database: "aemandko_Tinchai",
 // });
+
+export const queryAsync = util.promisify(conn.query).bind(conn);
