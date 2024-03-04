@@ -1,7 +1,7 @@
 import mysql from "mysql";
 import express from "express";
 // import bcryptt from "bcrypt";
-import { UpdateImage, login, register } from "../model/model";
+import { login, register } from "../model/model";
 import { conn } from "../dbconnect";
 
 export const router = express.Router();
