@@ -29,3 +29,9 @@ export interface Image {
   nameImage: string;
   score: number;
 }
+
+export interface UpdateScore {
+  mid: number;
+  score: number;
+}
+
