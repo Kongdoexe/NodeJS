@@ -30,6 +30,8 @@ export interface Image {
   score: number;
 }
 
-export interface UpdateImage {
-  image: string;
+export interface UpdateScore {
+  mid: number;
+  score: number;
 }
+
