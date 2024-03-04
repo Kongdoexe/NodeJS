@@ -59,13 +59,12 @@ router.post("/:id", (req, res) => {
     let userId = req.params.id;
     const body: Image = req.body;
 
-    let sql = "INSERT INTO `image`(`uid`, `name`, `image`, `nameImage`, `score`) VALUES (?, ?, ?, ?, ?)";
+    let sql = "INSERT INTO `image`(`uid`, `name`, `image`, `score`) VALUES (?, ?, ?, ?)";
 
     sql = mysql.format(sql , [
         userId,
         body.name,
         body.image,
-        body.nameImage,
         1500,
         0,
     ])

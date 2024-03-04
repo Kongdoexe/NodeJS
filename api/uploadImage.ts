@@ -66,13 +66,12 @@ router.post("/", fileUpload.diskLoader.single("file"), async (req, res) => {
   const url = await getDownloadURL(snapshot.ref);
   res.status(200).json({
     file: url,
-    name: filename
   });
 });
 
-router.delete("/:name", async (req, res) => {
+router.delete("/:link", async (req, res) => {
   let uid = req.query.id || "ImageProfileUser";
-  let link = req.params.name
+  let link = req.params.link
   if(uid != "ImageProfileUser"){
     uid = `User_${uid}`;
   }

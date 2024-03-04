@@ -1,7 +1,7 @@
 import mysql from "mysql";
 import express from "express";
 // import bcryptt from "bcrypt";
-import { login, register } from "../model/model";
+import { UpdateImage, login, register } from "../model/model";
 import { conn } from "../dbconnect";
 
 export const router = express.Router();
@@ -49,10 +49,10 @@ router.post("/Register", async (req, res) => {
 
         res
           .status(201)
-          .json({ affected_row: result.affectedRows, last_idx: result });
+          .json(true);
       });
     } else {
-      res.status(400).send("Passwords do not match");
+      res.json(false);
     }
   } catch (error) {
     console.error(error);
@@ -80,10 +80,10 @@ router.post("/Login", async (req, res) => {
         if (passwordMatch) {
           res.status(200).json(result[0]);
         } else {
-          res.status(401).send("Password Not Match");
+          res.status(401).json(false);
         }
       } else {
-        res.status(404).send({ error: "Gmail Not Found" });
+        res.status(404).json(false);
       }
     });
   } catch (error) {

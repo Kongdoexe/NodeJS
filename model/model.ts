@@ -29,3 +29,7 @@ export interface Image {
   nameImage: string;
   score: number;
 }
+
+export interface UpdateImage {
+  image: string;
+}
