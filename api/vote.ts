@@ -6,12 +6,6 @@ import { UpdateScore } from "../model/model";
 
 export const router = express.Router();
 
-
-router.get("/", (req, res) => {
-
-
-});
-
 router.get("/random", (req, res) => {
     const getRandomImages = () => {
         let random = "SELECT * FROM image ORDER BY RAND() LIMIT 2;";
@@ -25,15 +19,12 @@ router.get("/random", (req, res) => {
             if (result[0].uid !== result[1].uid) {
                 res.json(result);
             } else {
-                // If UIDs are the same, call the function again to fetch new random images
                 getRandomImages();
             }
         });
     };
 
-    // Call the function to start fetching random images
     getRandomImages();
-
 });
 
 router.put("/random", (req, res) => {

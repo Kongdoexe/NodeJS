@@ -94,7 +94,7 @@ router.delete("/:mid", (req, res) => {
     })
 })
 
-router.put("/Update:mid", async (req, res) => {
+router.put("/Update/:mid", async (req, res) => {
     let mid = req.params.mid;
     let img: Image = req.body
 
@@ -108,14 +108,11 @@ router.put("/Update:mid", async (req, res) => {
 
     const update = {...imgOrigin, ...img};
 
-    sql = "UPDATE `image` SET `mid`=?,`uid`=?,`name`=?,`image`=?,`nameImage`=?,`score`=? WHERE `mid` = ?";
+    sql = "UPDATE `image` SET `name`=?,`image`=?, `score`=? WHERE `mid` = ?";
 
     sql = mysql.format(sql , [
-        update.mid,
-        update.uid,
         update.name,
         update.image,
-        update.nameImage,
         1500,
         mid
     ]);
