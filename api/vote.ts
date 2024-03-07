@@ -7,24 +7,41 @@ import { UpdateScore } from "../model/model";
 export const router = express.Router();
 
 router.get("/random", (req, res) => {
-    const getRandomImages = () => {
-        let random = "SELECT * FROM image ORDER BY RAND() LIMIT 2;";
 
-        conn.query(random, (err, result) => {
-            if (err) {
-                res.status(500).json({ error: "Internal Server Error" });
-                throw err;
-            }
+    let sql = "SELECT * FROM image";
 
-            if (result[0].uid !== result[1].uid) {
-                res.json(result);
-            } else {
-                getRandomImages();
-            }
-        });
-    };
+    conn.query(sql , (err, result) => {
+        if(err) {
+            console.error("ERROR!");
+            return;
+        }
 
-    getRandomImages();
+        if(result == 0){
+            res.status(500).send(false);
+            res.status(500).json({ error : "Not Have Image In Database" })
+        }
+
+        else {
+            const getRandomImages = () => {
+                let random = "SELECT * FROM image ORDER BY RAND() LIMIT 2;";
+        
+                conn.query(random, (err, result) => {
+                    if (err) {
+                        res.status(500).json({ error: "Internal Server Error" });
+                        throw err;
+                    }
+        
+                    if (result[0].uid !== result[1].uid) {
+                        res.json(result);
+                    } else {
+                        getRandomImages();
+                    }
+                });
+            };
+        
+            getRandomImages();
+        }
+    })
 });
 
 router.put("/random", (req, res) => {
