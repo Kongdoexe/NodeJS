@@ -6,43 +6,45 @@ import { UpdateScore } from "../model/model";
 
 export const router = express.Router();
 
+
 router.get("/random", (req, res) => {
-
-    let sql = "SELECT * FROM image";
-
-    conn.query(sql , (err, result) => {
-        if(err) {
+    let check: number[] = []
+    let sql = `SELECT * FROM image`;
+    
+    conn.query(sql, (err, result) => {
+        if (err) {
             console.error("ERROR!");
-            return;
+            return res.status(500).json({ error: "Internal Server Error" });
         }
 
-        if(result == 0){
-            res.status(500).send(false);
-            res.status(500).json({ error : "Not Have Image In Database" })
-        }
+        const getRandomImages = () => {
+            let randomSql = "SELECT * FROM image ORDER BY RAND() LIMIT 2";
 
-        else {
-            const getRandomImages = () => {
-                let random = "SELECT * FROM image ORDER BY RAND() LIMIT 2;";
-        
-                conn.query(random, (err, result) => {
-                    if (err) {
-                        res.status(500).json({ error: "Internal Server Error" });
-                        throw err;
-                    }
-        
-                    if (result[0].uid !== result[1].uid) {
-                        res.json(result);
-                    } else {
-                        getRandomImages();
-                    }
-                });
-            };
-        
-            getRandomImages();
-        }
-    })
+            conn.query(randomSql, (err, randomResult) => {
+                if (err) {
+                    return res.status(500).json({ error: "Internal Server Error" });
+                }
+
+                const [image1, image2] = randomResult;
+
+                check.push(randomResult.mid)
+
+                console.log(check);
+                
+
+                if (image1.uid !== image2.uid) {
+                    res.json(randomResult);
+                } else {
+                    getRandomImages();
+                }
+            });
+        };
+
+        getRandomImages();
+    });
 });
+
+
 
 router.put("/random", (req, res) => {
 
