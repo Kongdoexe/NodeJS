@@ -35,3 +35,25 @@ export interface UpdateScore {
   score: number;
 }
 
+export interface InsertDatum {
+  mid: number;
+  score: number;
+}
+
+export interface Vote {
+  uid : number;
+  winner: number;
+  loser: number;
+}
+
+export interface Inter {
+  fieldCount: number;
+  affectedRows: number;
+  insertId: number;
+  serverStatus: number;
+  warningCount: number;
+  message: string;
+  protocol41: boolean;
+  changedRows: number;
+}
+
