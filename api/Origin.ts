@@ -1,5 +1,6 @@
 import mysql from "mysql";
 import express from "express";
+import bcrypt from "bcrypt";
 // import bcryptt from "bcrypt";
 import { login, register } from "../model/model";
 import { conn } from "../dbconnect";
@@ -20,20 +21,19 @@ router.get("/Search", (req, res) => {
 
   conn.query(sql!,[query], (err, result) => {
     if (err) {
-      res.status(500).json({ error: "Internal Server Error" });
-      throw err;
+      res.json(false);
+      return
     }
 
-    res.json(result[0]);
+    res.json(true);
   });
 });
 
 router.post("/Register", async (req, res) => {
   try {
-    const body: register = req.body;
-    const bcrypt = require('bcrypt');
-
-    if (body.password === body.confim) {
+    const body = req.body;
+    
+    if (body.password === body.confirm) {
       const hashedPassword = await bcrypt.hash(body.password, saltRounds);
       let sql =
         "INSERT INTO `User`(`name`, `gmail`, `password`, `image`, `type`) VALUES (?,?,?,?,?)";
@@ -44,19 +44,22 @@ router.post("/Register", async (req, res) => {
         body.image,
         body.type,
       ]);
+      
       conn.query(sql, (err, result) => {
-        if (err) throw err;
+        if (err) {
+          console.error(err);
+          res.status(500).json({ error: "Internal Server Error" });
+          return;
+        }
 
-        res
-          .status(201)
-          .json(true);
+        res.status(201).json(true);
       });
     } else {
-      res.json(false);
+      res.status(400).json({ error: "Password and confirm do not match" });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
+    res.status(400).json({ error: "Error processing request" });
   }
 });
 

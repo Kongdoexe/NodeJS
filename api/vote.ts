@@ -7,6 +7,7 @@ import { InsertDatum, Inter, UpdateScore, Vote } from "../model/model";
 export const router = express.Router();
 
 let number: number[] = [];
+let length: number;
 
 router.get("/random", (req, res) => {
     let sql = `SELECT * FROM image`;
@@ -16,27 +17,37 @@ router.get("/random", (req, res) => {
             console.error("ERROR!");
             return res.status(500).json({ error: "Internal Server Error" });
         }
+        
+        const remainingRecords = result.filter((record: { mid: number; }) => !number.includes(record.mid));
+        length = remainingRecords.length;
 
-        if (number.length < result.length) {
-
+        if (length > 1) {
             const getRandomImages = () => {
                 let randomSql = "SELECT * FROM image ORDER BY RAND() LIMIT 2";
                 
-
-                if (number.length > 2) {
-                    randomSql = `SELECT * FROM image where mid NOT IN (${number}) ORDER BY RAND() LIMIT 2`;
+                if (number.length > 0) {
+                    randomSql = `SELECT * FROM image WHERE mid NOT IN (${number.join(',')}) ORDER BY RAND() LIMIT 2`;
                 }
 
                 conn.query(randomSql, (err, randomResult) => {
                     if (err) {
-                        return res.status(500).json({ error: "Internal Server Error" });
+                        res.status(500).json({ error: "Internal Server Error" });
+                        return;
                     }
-                    const [image1, image2] = randomResult;
 
-                    if (image1.uid !== image2.uid) {
-                        number.push(image1.mid);
-                        number.push(image2.mid);
-                        console.log(randomResult);
+                    if (!randomResult[0].uid || !randomResult[1].uid) {
+                        res.status(200).json(false);
+                        number = [];
+                        return;
+                    }
+
+                    if (randomResult[0].uid !== randomResult[1].uid) {
+                        length = remainingRecords.length - 2;
+                        randomResult.forEach((result: { mid: number; }) => {
+                            number.push(result.mid);
+                        });
+                        console.log(number);
+                        
                         res.json(randomResult);
                     } else {
                         getRandomImages();
@@ -45,7 +56,7 @@ router.get("/random", (req, res) => {
             };
             getRandomImages();
         } else {
-            res.status(200).json(false)
+            res.status(200).json(false);
             number = [];
         }
     });
