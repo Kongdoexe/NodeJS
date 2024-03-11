@@ -17,14 +17,14 @@ router.get("/random", (req, res) => {
             console.error("ERROR!");
             return res.status(500).json({ error: "Internal Server Error" });
         }
-        
+
         const remainingRecords = result.filter((record: { mid: number; }) => !number.includes(record.mid));
         length = remainingRecords.length;
 
         if (length > 1) {
             const getRandomImages = () => {
                 let randomSql = "SELECT * FROM image ORDER BY RAND() LIMIT 2";
-                
+
                 if (number.length > 0) {
                     randomSql = `SELECT * FROM image WHERE mid NOT IN (${number.join(',')}) ORDER BY RAND() LIMIT 2`;
                 }
@@ -47,7 +47,7 @@ router.get("/random", (req, res) => {
                             number.push(result.mid);
                         });
                         console.log(number);
-                        
+
                         res.json(randomResult);
                     } else {
                         getRandomImages();
@@ -146,11 +146,12 @@ router.post("/InsertVote", (req, res) => {
 router.get("/SearchDatum", async (req, res) => {
     let sql = `SELECT d1.mid, DATE(d1.date) AS day, MAX(d1.date) AS latest_date, MAX(time(d1.date)) AS latest_time, d1.score
                 FROM datum as d1
-                JOIN ( SELECT mid, DATE(date) AS day, MAX(date) AS max_date
-                FROM datum
-                GROUP BY mid, day) as d2
-                ON d1.mid = d2.mid AND DATE(d1.date) = d2.day AND d1.date = d2.max_date
-                GROUP BY d1.mid, day, d1.score`
+                JOIN ( SELECT mid, MAX(date) AS max_date
+                        FROM datum
+                        WHERE date >= CURDATE() - INTERVAL 7 DAY
+                        GROUP BY mid) as d2
+                        ON d1.mid = d2.mid AND d1.date = d2.max_date
+                        GROUP BY d1.mid, day, d1.score`
     try {
         const result = await queryAsync(sql);
         res.status(200).json({ reuslt: result })
