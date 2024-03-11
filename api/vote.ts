@@ -17,14 +17,14 @@ router.get("/random", (req, res) => {
             console.error("ERROR!");
             return res.status(500).json({ error: "Internal Server Error" });
         }
-        
+
         const remainingRecords = result.filter((record: { mid: number; }) => !number.includes(record.mid));
         length = remainingRecords.length;
 
         if (length > 1) {
             const getRandomImages = () => {
                 let randomSql = "SELECT * FROM image ORDER BY RAND() LIMIT 2";
-                
+
                 if (number.length > 0) {
                     randomSql = `SELECT * FROM image WHERE mid NOT IN (${number.join(',')}) ORDER BY RAND() LIMIT 2`;
                 }
@@ -47,7 +47,7 @@ router.get("/random", (req, res) => {
                             number.push(result.mid);
                         });
                         console.log(number);
-                        
+
                         res.json(randomResult);
                     } else {
                         getRandomImages();
