@@ -174,13 +174,14 @@ router.get("/Graph/:uid", async (req, res) => {
     //                     GROUP BY d1.mid, day, d1.score`
 
 
-    sql = `SELECT datum.mid, datum.score, datum.date as date, image.score as m_score
+    sql = `SELECT datum.mid, datum.score, DATE_FORMAT(datum.date, '%Y-%m-%d %H:%i:%s') AS date, image.score AS m_score
     FROM datum
     JOIN image ON datum.mid = image.mid 
     WHERE image.uid = ${uid}
-    AND DATE(datum.date) >= CURDATE() - INTERVAL 7 DAY
-    AND DATE(datum.date) <= CURDATE()`;
-
+    AND datum.date >= CURDATE() - INTERVAL 7 DAY
+    AND datum.date < CURDATE() + INTERVAL 1 DAY
+    ORDER BY datum.date`;
+    
     try {
         const result : any = await queryAsync(sql!);
 
