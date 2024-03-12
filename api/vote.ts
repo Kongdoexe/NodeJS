@@ -125,13 +125,30 @@ router.post("/InsertVote", (req, res) => {
         }
 
         if (result.length > 0) {
-
-            sql = `INSERT INTO datum(mid, score, date) VALUES (?, ?, ?)`;
-            sql = mysql.format(sql, [data.mid, data.score, currentTime]);
-
             try {
+
+                sql = `SELECT *
+                        FROM datum
+                        WHERE mid = ${data.mid} AND DATE(date) = CURDATE()
+                        GROUP BY mid`;
+
+                const resultDatum: any = await queryAsync(sql);
+
+                if (resultDatum.length === 0) {
+                    sql = `INSERT INTO datum(mid, score, date) VALUES (?, ?, ?)`;
+                    sql = mysql.format(sql, [data.mid, data.score, currentTime]);
+                } else {
+                    sql = `UPDATE datum 
+                            set score = ?,
+                            date = ?
+                            where mid = ?
+                            AND DATE(date) = CURDATE()`;
+                    sql = mysql.format(sql, [data.score, currentTime, data.mid])
+                }
+
                 const result = await queryAsync(sql);
-                res.status(200).json({ success: true });
+                res.status(200).json({ success: true, result: result });
+
             } catch (error) {
                 console.error(error);
                 res.status(500).json({ error: "Error Query!" });
@@ -143,18 +160,35 @@ router.post("/InsertVote", (req, res) => {
     })
 });
 
-router.get("/SearchDatum", async (req, res) => {
-    let sql = `SELECT d1.mid, DATE(d1.date) AS day, MAX(d1.date) AS latest_date, MAX(time(d1.date)) AS latest_time, d1.score
-                FROM datum as d1
-                JOIN ( SELECT mid, MAX(date) AS max_date
-                        FROM datum
-                        WHERE date >= CURDATE() - INTERVAL 7 DAY
-                        GROUP BY mid) as d2
-                        ON d1.mid = d2.mid AND d1.date = d2.max_date
-                        GROUP BY d1.mid, day, d1.score`
+// เอาข้อมูลล่าสุด
+router.get("/Graph/:uid", async (req, res) => {
+    let sql;
+    const uid = req.params.uid
+    // let sql = `SELECT d1.mid, DATE(d1.date) AS day, MAX(d1.date) AS latest_date, MAX(time(d1.date)) AS latest_time, d1.score
+    //             FROM datum as d1
+    //             JOIN ( SELECT mid, MAX(date) AS max_date
+    //                     FROM datum
+    //                     WHERE date >= CURDATE() - INTERVAL 7 DAY
+    //                     GROUP BY mid) as d2
+    //                     ON d1.mid = d2.mid AND d1.date = d2.max_date
+    //                     GROUP BY d1.mid, day, d1.score`
+
+
+    sql = `SELECT datum.mid, datum.score, datum.date as date, image.score as m_score
+    FROM datum
+    JOIN image ON datum.mid = image.mid 
+    WHERE image.uid = ${uid}
+    AND DATE(datum.date) >= CURDATE() - INTERVAL 7 DAY
+    AND DATE(datum.date) <= CURDATE()`;
+
     try {
-        const result = await queryAsync(sql);
-        res.status(200).json({ reuslt: result })
+        const result : any = await queryAsync(sql!);
+
+        if (result.length > 0){
+            res.status(200).json(result)
+        } else {
+            res.status(400).json({ error : "Error Result = []" })
+        }
     } catch (error) {
         res.status(500).json({ error: "Error Query!" })
     }

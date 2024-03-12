@@ -57,3 +57,8 @@ export interface Inter {
   changedRows: number;
 }
 
+export interface Graph {
+  mid:   number;
+  score: number;
+  DATE:  Date;
+}

@@ -74,7 +74,7 @@ router.delete("/:link", async (req, res) => {
   const stora = "gs://uploadimage-project.appspot.com";
   const filename = `${stora}/images/${uid}/${link}`
   
-  const deleteref = ref(storage, filename);  
+  const deleteref = ref(storage, filename);
 
   deleteObject(deleteref).then(() => {
     res.status(200).json("Finish");

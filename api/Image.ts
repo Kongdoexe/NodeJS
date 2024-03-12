@@ -122,3 +122,23 @@ router.put("/Update/:mid", async (req, res) => {
         res.status(200).json(result)
     })
 })
+
+router.get("/getScore/:mid" ,async (req , res) => {
+    let mid = req.params.mid
+
+    let sql = `SELECT mid , score
+                from image
+                where mid = ${mid}`;
+
+    try {
+        const result : any = await queryAsync(sql);
+
+        if(result.length > 0) {
+            res.status(200).json(result)
+        } else {
+            res.status(500).json({ error : "Error Image Not Found" })
+        }
+    } catch (error) {
+        res.status(400).json({ error : "Error Query!!!" })
+    }
+})
