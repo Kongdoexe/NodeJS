@@ -3,7 +3,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 // import bcryptt from "bcrypt";
 import { login, register } from "../model/model";
-import { conn } from "../dbconnect";
+import { conn, queryAsync } from "../dbconnect";
 
 export const router = express.Router();
 
@@ -93,3 +93,17 @@ router.post("/Login", async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
+
+router.put("/update",async (req, res) => {
+  const body = req.body
+  let sql = `UPDATE image SET name = ? WHERE mid = ?`;
+  sql = mysql.format(sql , [body.name , body.mid])
+
+  try {
+    const response = await queryAsync(sql);
+    console.log(response);
+    res.status(200).json(true)
+  } catch (error) {
+    res.status(500).json(false)
+  }
+})
