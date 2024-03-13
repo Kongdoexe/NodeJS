@@ -46,7 +46,6 @@ router.get("/random", (req, res) => {
                         randomResult.forEach((result: { mid: number; }) => {
                             number.push(result.mid);
                         });
-                        console.log(number);
 
                         res.json(randomResult);
                     } else {
@@ -145,7 +144,7 @@ router.post("/InsertVote", (req, res) => {
                             AND DATE(date) = CURDATE()`;
                     sql = mysql.format(sql, [data.score, currentTime, data.mid])
                 }
-
+                
                 const result = await queryAsync(sql);
                 res.status(200).json({ success: true, result: result });
 
@@ -164,15 +163,6 @@ router.post("/InsertVote", (req, res) => {
 router.get("/Graph/:uid", async (req, res) => {
     let sql;
     const uid = req.params.uid
-    // let sql = `SELECT d1.mid, DATE(d1.date) AS day, MAX(d1.date) AS latest_date, MAX(time(d1.date)) AS latest_time, d1.score
-    //             FROM datum as d1
-    //             JOIN ( SELECT mid, MAX(date) AS max_date
-    //                     FROM datum
-    //                     WHERE date >= CURDATE() - INTERVAL 7 DAY
-    //                     GROUP BY mid) as d2
-    //                     ON d1.mid = d2.mid AND d1.date = d2.max_date
-    //                     GROUP BY d1.mid, day, d1.score`
-
 
     sql = `SELECT datum.mid, datum.score, DATE_FORMAT(datum.date, '%Y-%m-%d %H:%i:%s') AS date, image.score AS m_score , image.image as url
     FROM datum
