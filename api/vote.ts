@@ -25,7 +25,7 @@ router.get("/random", (req, res) => {
             const getRandomImages = () => {
                 let randomSql = "SELECT * FROM image ORDER BY RAND() LIMIT 2";
 
-                if (number.length > 0) {
+                if (number.length > 2) {
                     randomSql = `SELECT * FROM image WHERE mid NOT IN (${number.join(',')}) ORDER BY RAND() LIMIT 2`;
                 }
 
@@ -35,7 +35,7 @@ router.get("/random", (req, res) => {
                         return;
                     }
 
-                    if (!randomResult[0].uid || !randomResult[1].uid) {
+                    if (!randomResult[0] || !randomResult[1]) {
                         res.status(200).json(false);
                         number = [];
                         return;
@@ -47,7 +47,7 @@ router.get("/random", (req, res) => {
                             number.push(result.mid);
                         });
 
-                        res.json(randomResult);
+                        res.status(200).json(randomResult);
                     } else {
                         getRandomImages();
                     }
@@ -55,7 +55,7 @@ router.get("/random", (req, res) => {
             };
             getRandomImages();
         } else {
-            res.status(200).json(false);
+            res.json(false);
             number = [];
         }
     });
