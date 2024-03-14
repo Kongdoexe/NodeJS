@@ -32,8 +32,9 @@ router.get("/Search", (req, res) => {
 router.post("/Register", async (req, res) => {
   try {
     const body = req.body;
-    
-    if (body.password === body.confirm) {
+    console.log(body);
+
+    if (body.password === body.confim) {
       const hashedPassword = await bcrypt.hash(body.password, saltRounds);
       let sql =
         "INSERT INTO `User`(`name`, `gmail`, `password`, `image`, `type`) VALUES (?,?,?,?,?)";
