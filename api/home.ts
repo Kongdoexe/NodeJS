@@ -6,56 +6,86 @@ import { InsertDatum, Inter, UpdateScore, Vote } from "../model/model";
 
 export const router = express.Router();
 
+
 router.get('/', (req, res) => {
-    let sqlImages = `
+    let sqlImagesToday = `
         SELECT ROW_NUMBER() OVER (ORDER BY image.score DESC) AS rank, image.*, datum.score AS datum_score
         FROM image
         LEFT JOIN datum ON image.mid = datum.mid
-        WHERE DATE(datum.date) = CURDATE() - INTERVAL 1 DAY
+        WHERE DATE(datum.date) = CURDATE()
         ORDER BY image.score DESC
-        LIMIT 10
     `;
 
-    conn.query(sqlImages, (err, imageResult) => {
+    let sqlImagesYesterday = `
+        SELECT ROW_NUMBER() OVER (ORDER BY datum.score DESC) AS rank_yesterday, image.*, datum.score AS datum_score
+        FROM image
+        LEFT JOIN datum ON image.mid = datum.mid
+        WHERE DATE(datum.date) = CURDATE() - INTERVAL 1 DAY
+        ORDER BY datum.score DESC
+    `;
+
+    conn.query(sqlImagesToday, (err, todayResult) => {
         if (err) {
-            console.error("ERROR fetching images:", err);
-            return res.status(500).json({ err: "Error fetching images" });
+            console.error("ERROR fetching images today:", err);
+            return res.status(500).json({ err: "Error fetching images today" });
         }
 
-        if (imageResult.length > 0) {
-            for (let i = 0; i < imageResult.length; i++) {
-
-                let changeMessage;
-                if (imageResult[i].score > imageResult[i].datum_score) {
-                    // "Score Up"
-                    changeMessage = 1;
-                } else if (imageResult[i].score < imageResult[i].datum_score) {
-                    // "Score Down"
-                    changeMessage = 2;
-                } else {
-                    // "Score remains the same"
-                    changeMessage = 0;
-                }
-
-                // Add changeMessage property to each image object
-                imageResult[i].changeMessage = changeMessage;
+        conn.query(sqlImagesYesterday, (err, yesterdayResult) => {
+            if (err) {
+                console.error("ERROR fetching images yesterday:", err);
+                return res.status(500).json({ err: "Error fetching images yesterday" });
             }
 
-            // Prepare response data
-            const responseData = {
-                images: imageResult,
-            };
+            // Check if results are not empty
+            if (todayResult.length > 0 && yesterdayResult.length > 0) {
+                // Loop through images today
+                for (let i = 0; i < todayResult.length; i++) {
+                    let changeMessage;
+                    let resultRank;
+                    // Find corresponding image from yesterday
+                    const yesterdayImage = yesterdayResult.find((image: { mid: any; }) => image.mid === todayResult[i].mid);
+                    if (yesterdayImage) {
 
-            // Send response
-            res.json(responseData);
-            console.log(responseData);
-        } else {
-            console.log("No images found");
-            res.status(404).json({ message: "No images found" });
-        }
+                        // Compare ranks
+                        if (todayResult[i].rank < yesterdayImage.rank_yesterday) {
+                            // "Score Up"
+                            // changeMessage = "Score Up";
+                            changeMessage = 1;
+                            resultRank = yesterdayImage.rank_yesterday - todayResult[i].rank
+
+                        } else if (todayResult[i].rank > yesterdayImage.rank_yesterday) {
+                            // "Score Down"
+                            // resultRank = yesterdayImage.rank_yesterday - todayResult[i].rank
+                            changeMessage = 2;
+                            resultRank = todayResult[i].rank - yesterdayImage.rank_yesterday
+                            // changeMessage = "Score Down";
+
+                        } else {
+                            // "Score remains the same"
+                            changeMessage = 0;
+                            // changeMessage = "Score remains the same";
+                        }
+                        // Assign changeMessage to both today and yesterday images
+                        todayResult[i].resultRank = resultRank;
+                        todayResult[i].changeMessage = changeMessage;
+                        // yesterdayImage.changeMessage = changeMessage;
+                    }
+
+                }
+                // Prepare response data
+                const responseData = {
+                    imagesToday: todayResult,
+                    // imagesYesterday: yesterdayResult
+                };
+                // Send response
+                res.status(200).json(responseData);
+            } else {
+                console.log("No images found");
+                res.status(404).json({ message: "No images found" });
+            }
+        });
     });
-})
-
+});
 
 
 
@@ -63,10 +93,11 @@ router.get('/', (req, res) => {
 
 // router.get('/', (req, res) => {
 //     let sqlImages = `
-//         SELECT ROW_NUMBER() OVER (ORDER BY score DESC) AS rank, image.*
+//         SELECT ROW_NUMBER() OVER (ORDER BY image.score DESC) AS rank, image.*, datum.score AS datum_score
 //         FROM image
-//         ORDER BY score DESC
-//         LIMIT 10
+//         LEFT JOIN datum ON image.mid = datum.mid
+//         WHERE DATE(datum.date) = CURDATE() - INTERVAL 1 DAY
+//         ORDER BY image.score DESC
 //     `;
 
 //     conn.query(sqlImages, (err, imageResult) => {
@@ -75,25 +106,36 @@ router.get('/', (req, res) => {
 //             return res.status(500).json({ err: "Error fetching images" });
 //         }
 
-//         let sqlData = `SELECT * FROM datum WHERE DATE(date) = CURRENT_DATE();`;
+//         if (imageResult.length > 0) {
+//             for (let i = 0; i < imageResult.length; i++) {
 
-//         conn.query(sqlData, (err, dataDate) => {
-//             if (err) {
-//                 console.error("ERROR fetching data today:", err);
-//                 return res.status(500).json({ err: "Error fetching data today" });
+//                 let changeMessage;
+//                 if (imageResult[i].score > imageResult[i].datum_score) {
+//                     // "Score Up"
+//                     changeMessage = 1;
+//                 } else if (imageResult[i].score < imageResult[i].datum_score) {
+//                     // "Score Down"
+//                     changeMessage = 2;
+//                 } else {
+//                     // "Score remains the same"
+//                     changeMessage = 0;
+//                 }
+
+//                 // Add changeMessage property to each image object
+//                 imageResult[i].changeMessage = changeMessage;
 //             }
 
+//             // Prepare response data
 //             const responseData = {
 //                 images: imageResult,
-//                 dataToday: dataDate,
 //             };
 
+//             // Send response
 //             res.json(responseData);
 //             console.log(responseData);
-
-//         });
+//         } else {
+//             console.log("No images found");
+//             res.status(404).json({ message: "No images found" });
+//         }
 //     });
-
-
-
-// });
+// })
