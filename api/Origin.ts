@@ -2,7 +2,7 @@ import mysql from "mysql";
 import express from "express";
 import bcrypt from "bcrypt";
 // import bcryptt from "bcrypt";
-import { UpdateUser, login, register } from "../model/model";
+import { ChangePass, UpdateUser, login, register } from "../model/model";
 import { conn, queryAsync } from "../dbconnect";
 
 export const router = express.Router();
@@ -10,16 +10,16 @@ export const router = express.Router();
 const saltRounds = 10;
 
 router.get("/Search", (req, res) => {
-  let sql , query;
-  if(req.query.gmail){
+  let sql, query;
+  if (req.query.gmail) {
     sql = "SELECT * FROM User where gmail = ?";
-    query = req.query.gmail;    
-  } else if (req.query.id){
+    query = req.query.gmail;
+  } else if (req.query.id) {
     sql = "SELECT * FROM User where uid = ?"
     query = req.query.id;
   }
 
-  conn.query(sql!,[query], (err, result) => {
+  conn.query(sql!, [query], (err, result) => {
     if (err) {
       res.json(false);
       return
@@ -45,7 +45,7 @@ router.post("/Register", async (req, res) => {
         body.image,
         body.type,
       ]);
-      
+
       conn.query(sql, (err, result) => {
         if (err) {
           console.error(err);
@@ -95,10 +95,10 @@ router.post("/Login", async (req, res) => {
   }
 });
 
-router.put("/update",async (req, res) => {
+router.put("/update", async (req, res) => {
   const body = req.body
   let sql = `UPDATE image SET name = ? WHERE mid = ?`;
-  sql = mysql.format(sql , [body.name , body.mid])
+  sql = mysql.format(sql, [body.name, body.mid])
 
   try {
     const response = await queryAsync(sql);
@@ -115,26 +115,58 @@ router.put("/Update/:uid", async (req, res) => {
 
   let sql = "select * from User where uid = ?";
 
-  sql = mysql.format(sql , [uid])
+  sql = mysql.format(sql, [uid])
 
   let result = await queryAsync(sql);
 
   const UserOrigin: UpdateUser = JSON.parse(JSON.stringify(result));
 
-  const update = {...UserOrigin, ...User};
+  const update = { ...UserOrigin, ...User };
 
   sql = "UPDATE `User` SET `name`=?, `gmail`=? , `password`=? ,`image`=? WHERE `uid` = ?";
 
-  sql = mysql.format(sql , [
-      update.name,
-      update.gmail,
-      update.password,
-      update.image,
-      uid
+  sql = mysql.format(sql, [
+    update.name,
+    update.gmail,
+    update.password,
+    update.image,
+    uid
   ]);
 
   conn.query(sql, (err, result) => {
-      if(err) throw err;
-      res.status(200).json(result)
+    if (err) throw err;
+    res.status(200).json(result)
   })
 })
+
+router.put("/updatePass/:uid", async (req, res) => {
+  const body = req.body;
+  const uid = req.params.uid;
+
+  let sql = `SELECT * FROM User WHERE uid = ${uid}`;
+  
+  try {
+    const resultUser:any = await queryAsync(sql);
+
+    if (resultUser.length > 0) {
+      const storedPassword = resultUser[0].password;
+      const passwordMatch = await bcrypt.compare(body.Opassword, storedPassword);
+
+      if (passwordMatch) {
+        const hashedNewPassword = await bcrypt.hash(body.Npassword, saltRounds);
+        
+        const updateSql = `UPDATE User SET password = '${hashedNewPassword}' WHERE uid = ${uid}`;
+        await queryAsync(updateSql);
+
+        res.status(200).json(false);
+      } else {
+        res.status(401).json({ error: "Old password provided is incorrect" });
+      }
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});

@@ -107,6 +107,9 @@ router.put("/Update/:mid", async (req, res) => {
 
     let result = await queryAsync(sql);
 
+    sql = `DELETE FROM datum where mid = ${mid}`;
+    await queryAsync(sql);
+
     const imgOrigin: Image = JSON.parse(JSON.stringify(result));
 
     const update = {...imgOrigin, ...img};

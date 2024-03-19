@@ -64,3 +64,7 @@ export interface UpdateUser {
   image: string;
 }
 
+export interface ChangePass {
+  Opassword : string;
+  Npassword : string;
+}
