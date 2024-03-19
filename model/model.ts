@@ -41,7 +41,6 @@ export interface InsertDatum {
 }
 
 export interface Vote {
-  uid : number;
   winner: number;
   loser: number;
 }
@@ -57,5 +56,11 @@ export interface Inter {
   changedRows: number;
 }
 
-
+export interface UpdateUser {
+  uid: number;
+  name: string;
+  gmail: string;
+  password: string;
+  image: string;
+}
 

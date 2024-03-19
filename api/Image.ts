@@ -55,9 +55,12 @@ router.get("/:id", (req, res) => {
     });
 });
 
-router.post("/:id", (req, res) => {
+router.post("/:id",async (req, res) => {
     let userId = req.params.id;
     const body: Image = req.body;
+
+    let sqldelete = `DELETE FROM datum WHERE mid = ${body.mid}`;
+    await queryAsync(sqldelete)
 
     let sql = "INSERT INTO `image`(`uid`, `name`, `image`, `score`) VALUES (?, ?, ?, ?)";
 

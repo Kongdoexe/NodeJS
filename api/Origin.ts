@@ -2,7 +2,7 @@ import mysql from "mysql";
 import express from "express";
 import bcrypt from "bcrypt";
 // import bcryptt from "bcrypt";
-import { login, register } from "../model/model";
+import { UpdateUser, login, register } from "../model/model";
 import { conn, queryAsync } from "../dbconnect";
 
 export const router = express.Router();
@@ -107,4 +107,34 @@ router.put("/update",async (req, res) => {
   } catch (error) {
     res.status(500).json(false)
   }
+})
+
+router.put("/Update/:uid", async (req, res) => {
+  let uid = req.params.uid;
+  let User: UpdateUser = req.body
+
+  let sql = "select * from User where uid = ?";
+
+  sql = mysql.format(sql , [uid])
+
+  let result = await queryAsync(sql);
+
+  const UserOrigin: UpdateUser = JSON.parse(JSON.stringify(result));
+
+  const update = {...UserOrigin, ...User};
+
+  sql = "UPDATE `User` SET `name`=?, `gmail`=? , `password`=? ,`image`=? WHERE `uid` = ?";
+
+  sql = mysql.format(sql , [
+      update.name,
+      update.gmail,
+      update.password,
+      update.image,
+      uid
+  ]);
+
+  conn.query(sql, (err, result) => {
+      if(err) throw err;
+      res.status(200).json(result)
+  })
 })

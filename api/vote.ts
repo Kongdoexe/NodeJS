@@ -94,8 +94,8 @@ router.post("/InsertWinnerLoser", async (req, res) => {
             return res.status(400).json({ error: "Winner or loser not found" });
         }
 
-        sql = `INSERT INTO vote (uid ,winner, loser, date) VALUES (?, ?, ?, ?)`;
-        sql = mysql.format(sql, [data.uid, data.winner, data.loser, currentTime]);
+        sql = `INSERT INTO vote (winner, loser, date) VALUES (?, ?, ?)`;
+        sql = mysql.format(sql, [data.winner, data.loser, currentTime]);
 
         const insertResult = await queryAsync(sql) as Inter;
 
