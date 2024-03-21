@@ -58,11 +58,11 @@ router.get('/', (req, res) => {
                                 changeMessage = 2;
                                 resultRank = todayResult[i].rank - yesterdayImage.rank_yesterday;
 
-                            } else  {
+                            } else {
                                 // "Score remains the same"
                                 changeMessage = 0;
                             }
-                        }else{
+                        } else {
                             changeMessage = 0;
                         }
 
@@ -83,8 +83,23 @@ router.get('/', (req, res) => {
                 res.status(200).json(responseData);
             });
         } else {
-            console.log("No images found");
-            res.status(404).json({ message: "No images found" });
+
+            let sqlImages = `
+                SELECT ROW_NUMBER() OVER (ORDER BY image.score DESC) AS rank, image.*
+                FROM image
+                ORDER BY image.score DESC
+            `;
+
+            conn.query(sqlImages, (err, result) => {
+                if (err) {
+                    console.log("No images found");
+                    res.status(404).json({ message: "No images found" });
+                }
+
+                res.json(result);
+
+            });
+
         }
     });
 });
