@@ -2,12 +2,25 @@ import mysql from "mysql";
 import express from "express";
 import bcrypt from "bcrypt";
 // import bcryptt from "bcrypt";
-import { ChangePass, UpdateUser, login, register } from "../model/model";
+import { ChangePass, UpdateUser, User, login, register } from "../model/model";
 import { conn, queryAsync } from "../dbconnect";
 
 export const router = express.Router();
 
 const saltRounds = 10;
+
+router.get("/getAll",async (req, res) => {
+  let sql;
+  sql = `SELECT * FROM User where type != 1`;
+
+  try {
+    const result = await queryAsync(sql) as User[];
+    
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({error: "Error Query!!"});
+  }
+})
 
 router.get("/Search", (req, res) => {
   let sql, query;
