@@ -40,7 +40,7 @@ router.get("/random", (req, res) => {
                         number = [];
                         return;
                     }
-
+                    
                     if (randomResult[0].uid !== randomResult[1].uid) {
                         length = remainingRecords.length - 2;
                         randomResult.forEach((result: { mid: number; }) => {

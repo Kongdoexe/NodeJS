@@ -68,3 +68,8 @@ export interface ChangePass {
   Opassword : string;
   Npassword : string;
 }
+
+export interface Daley {
+  delay: number;
+  date:  Date;
+}

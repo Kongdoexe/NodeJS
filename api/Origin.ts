@@ -2,7 +2,7 @@ import mysql from "mysql";
 import express from "express";
 import bcrypt from "bcrypt";
 // import bcryptt from "bcrypt";
-import { ChangePass, UpdateUser, User, login, register } from "../model/model";
+import { ChangePass, Daley, UpdateUser, User, login, register } from "../model/model";
 import { conn, queryAsync } from "../dbconnect";
 
 export const router = express.Router();
@@ -183,3 +183,37 @@ router.put("/updatePass/:uid", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+router.get("/getDaley" ,async (req, res) => {
+  let sql;
+
+  sql = `SELECT * 
+          FROM Daley 
+          WHERE DATE(date) = CURDATE()
+          ORDER BY date DESC
+          LIMIT 1`;
+
+  try {
+    const Response = await queryAsync(sql) as Daley;
+    res.status(200).json(Response);
+  } catch (error) {
+    res.status(500).json({ error : "Error Query!" })
+  }
+})
+
+router.post("/postDaley" , async (req, res) => {
+  let sql;
+  const body : Daley = req.body;
+  let currentTime = new Date();
+
+  sql = `INSERT INTO Daley(delay, date) VALUES (? ,?)`;
+
+  sql = mysql.format(sql , [body.delay , currentTime])
+
+  try {
+    const response = await queryAsync(sql);
+    res.status(200).json({ success : true  })
+  } catch (error) {
+    res.status(200).json({ success : false  })
+  }
+})
