@@ -5,6 +5,7 @@ import { router as image } from './api/Image';
 import { router as Vote } from './api/vote';
 import { router as home } from './api/home';
 import { router as profile } from './api/profile';
+import { router as lookProfile } from './api/lookProfile';
 import bodyParser from "body-parser";
 import cors from "cors";
 
@@ -25,3 +26,4 @@ app.use("/Image", image);
 app.use("/Vote", Vote);
 app.use("/Home", home);
 app.use("/Profile", profile);
+app.use("/lookProfile", lookProfile);
