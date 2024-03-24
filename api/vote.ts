@@ -173,12 +173,12 @@ router.get("/Graph/:uid", async (req, res) => {
     ORDER BY datum.date`;
     
     try {
-        const result : any = await queryAsync(sql!);
+        const result : any = await queryAsync(sql);
 
         if (result.length > 0){
             res.status(200).json(result)
         } else {
-            res.status(400).json({ error : "Error Result = []" })
+            res.json(false)
         }
     } catch (error) {
         res.status(500).json({ error: "Error Query!" })

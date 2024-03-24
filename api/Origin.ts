@@ -9,16 +9,16 @@ export const router = express.Router();
 
 const saltRounds = 10;
 
-router.get("/getAll",async (req, res) => {
+router.get("/getAll", async (req, res) => {
   let sql;
   sql = `SELECT * FROM User where type != 1`;
 
   try {
     const result = await queryAsync(sql) as User[];
-    
+
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({error: "Error Query!!"});
+    res.status(500).json({ error: "Error Query!!" });
   }
 })
 
@@ -157,9 +157,9 @@ router.put("/updatePass/:uid", async (req, res) => {
   const uid = req.params.uid;
 
   let sql = `SELECT * FROM User WHERE uid = ${uid}`;
-  
+
   try {
-    const resultUser:any = await queryAsync(sql);
+    const resultUser: any = await queryAsync(sql);
 
     if (resultUser.length > 0) {
       const storedPassword = resultUser[0].password;
@@ -167,7 +167,7 @@ router.put("/updatePass/:uid", async (req, res) => {
 
       if (passwordMatch) {
         const hashedNewPassword = await bcrypt.hash(body.Npassword, saltRounds);
-        
+
         const updateSql = `UPDATE User SET password = '${hashedNewPassword}' WHERE uid = ${uid}`;
         await queryAsync(updateSql);
 
@@ -184,36 +184,37 @@ router.put("/updatePass/:uid", async (req, res) => {
   }
 });
 
-router.get("/getDaley" ,async (req, res) => {
+router.get("/getDaley", async (req, res) => {
   let sql;
 
   sql = `SELECT * 
-          FROM Daley 
-          WHERE DATE(date) = CURDATE()
-          ORDER BY date DESC
-          LIMIT 1`;
+  FROM Daley 
+  WHERE DATE(date) = (SELECT MAX(DATE(date)) FROM Daley)
+  ORDER BY date DESC
+  LIMIT 1;
+  `;
 
   try {
     const Response = await queryAsync(sql) as Daley;
     res.status(200).json(Response);
   } catch (error) {
-    res.status(500).json({ error : "Error Query!" })
+    res.status(500).json({ error: "Error Query!" })
   }
 })
 
-router.post("/postDaley" , async (req, res) => {
+router.post("/postDaley", async (req, res) => {
   let sql;
-  const body : Daley = req.body;
+  const body: Daley = req.body;
   let currentTime = new Date();
 
   sql = `INSERT INTO Daley(delay, date) VALUES (? ,?)`;
 
-  sql = mysql.format(sql , [body.delay , currentTime])
+  sql = mysql.format(sql, [body.delay, currentTime])
 
   try {
     const response = await queryAsync(sql);
-    res.status(200).json({ success : true  })
+    res.status(200).json({ success: true })
   } catch (error) {
-    res.status(200).json({ success : false  })
+    res.status(200).json({ success: false })
   }
 })
