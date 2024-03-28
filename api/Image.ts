@@ -87,11 +87,13 @@ router.delete("/:mid", (req, res) => {
     
     let sql = "delete from image where mid = ?";
 
-    conn.query(sql, [mid], (err, result) => {
+    conn.query(sql, [mid],async (err, result) => {
         if(err) {
             console.error("Error executing query: ", err);
             return res.status(500).send({ error : "Internal Server Error" })
         }
+        sql = `delete from datum where mid = ${mid}`;
+        await queryAsync(sql);
 
         res.status(200).json(result)
     })

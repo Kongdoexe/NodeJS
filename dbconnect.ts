@@ -10,7 +10,7 @@ import util from "util";
 // });
 
 export const conn = mysql.createPool({
-  connectionLimit: 10,
+  connectionLimit: 40,
   host: "nv1.metrabyte.cloud",
   user: "aemandko_65011212084",
   password: "123456",

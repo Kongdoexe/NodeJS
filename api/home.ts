@@ -7,12 +7,19 @@ import { InsertDatum, Inter, UpdateScore, Vote } from "../model/model";
 export const router = express.Router();
 
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+
+    let sqlDatum = `SELECT mid FROM datum`;
+    const result: any = await queryAsync(sqlDatum);
+
+    const mids = result.map((row: { mid: any; }) => row.mid).join(',');
+
     let sqlImagesToday = `
         SELECT ROW_NUMBER() OVER (ORDER BY image.score DESC) AS rank, image.*, datum.score AS datum_score
         FROM image
         LEFT JOIN datum ON image.mid = datum.mid
         WHERE DATE(datum.date) = CURDATE()
+        AND image.mid IN (${mids})
         ORDER BY image.score DESC
     `;
 
@@ -21,6 +28,7 @@ router.get('/', (req, res) => {
         FROM image
         LEFT JOIN datum ON image.mid = datum.mid
         WHERE DATE(datum.date) = CURDATE() - INTERVAL 1 DAY
+        AND image.mid IN (${mids})
         ORDER BY datum.score DESC
     `;
 
@@ -84,32 +92,33 @@ router.get('/', (req, res) => {
                 let sqlall = `
                     SELECT ROW_NUMBER() OVER (ORDER BY image.score DESC) AS rank, image.* 
                     FROM image
+                    WHERE mid IN (${mids})
                     ORDER BY image.score DESC
                 `;
-            
+
                 conn.query(sqlall, (err, allImages) => {
                     if (err) {
                         console.error("ERROR fetching all images:", err);
                         return res.status(500).json({ err: "Error fetching all images" });
                     }
-            
+
                     // Loop through all images and set changeMessage to 0
                     for (let i = 0; i < allImages.length; i++) {
                         allImages[i].changeMessage = 0;
                     }
-            
+
                     // Prepare response data
                     const responseData = {
                         imagesToday: allImages
                     };
-            
+
                     // Send response
                     res.status(200).json(responseData);
                 });
             }
-            
-            
-            
+
+
+
         });
     });
 });
