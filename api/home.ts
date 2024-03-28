@@ -19,6 +19,7 @@ router.get('/', async (req, res) => {
         FROM image
         LEFT JOIN datum ON image.mid = datum.mid
         WHERE DATE(datum.date) = CURDATE()
+        GROUP BY image.mid
         ORDER BY image.score DESC
     `;
 
@@ -27,6 +28,7 @@ router.get('/', async (req, res) => {
         FROM image
         LEFT JOIN datum ON image.mid = datum.mid
         WHERE DATE(datum.date) = CURDATE() - INTERVAL 1 DAY
+        GROUP BY image.mid
         ORDER BY datum.score DESC
     `;
 
