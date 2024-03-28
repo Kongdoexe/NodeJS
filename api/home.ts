@@ -90,7 +90,6 @@ router.get('/', async (req, res) => {
                 let sqlall = `
                     SELECT ROW_NUMBER() OVER (ORDER BY image.score DESC) AS rank, image.* 
                     FROM image
-                    WHERE mid IN (${mids})
                     ORDER BY image.score DESC
                 `;
 
