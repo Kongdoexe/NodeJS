@@ -19,6 +19,7 @@ router.get('/', async (req, res) => {
         FROM image
         LEFT JOIN datum ON image.mid = datum.mid
         WHERE DATE(datum.date) = CURDATE()
+        AND image.mid IN (${mids})
         GROUP BY image.mid
         ORDER BY image.score DESC
     `;
@@ -28,6 +29,7 @@ router.get('/', async (req, res) => {
         FROM image
         LEFT JOIN datum ON image.mid = datum.mid
         WHERE DATE(datum.date) = CURDATE() - INTERVAL 1 DAY
+        AND image.mid IN (${mids})
         GROUP BY image.mid
         ORDER BY datum.score DESC
     `;
@@ -92,6 +94,7 @@ router.get('/', async (req, res) => {
                 let sqlall = `
                     SELECT ROW_NUMBER() OVER (ORDER BY image.score DESC) AS rank, image.* 
                     FROM image
+                    WHERE image.mid IN (${mids})
                     ORDER BY image.score DESC
                 `;
 
